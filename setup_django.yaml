@@ -1,0 +1,56 @@
+- hosts: localhost
+  connection: local
+  vars:
+    project_name: simpl8
+    project_path: /home/davoodi/Documents/ansible1/{{ project_name }}
+    ansible_python_interpreter: /usr/bin/python3
+    venv_path: /home/davoodi/Documents/ansible1/venv{{ project_name }}
+
+
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - python3
+          - python3-pip
+          - python3-venv
+          - python3-setuptools
+          - python3-wheel
+        state: present
+      become: yes
+      become_method: sudo
+
+    - name: Create Python virtual environment
+      pip:
+        name: virtualenv
+        state: present
+        version: latest
+        virtualenv: "{{ venv_path }}"
+
+
+#    - name: Activate the virtual environment
+ #     command: source {{venv_path}}/bin/activate  && pip install -r {{ project_path }}/requirements.txt
+#      become: yes
+#      become_method: sudo
+    - name: Activate the virtual environment and install requirements
+      pip:
+        requirements: "{{ project_path }}/requirements.txt"
+        virtualenv: "{{ venv_path }}"
+      become: yes
+      become_method: sudo
+
+
+    - name: Create Django project directory
+      file:
+        path: "{{ project_path }}"
+        state: directory
+
+#    - name: Create Django project
+#      command: django-admin startproject myproject "{{ project_path }}"
+
+    - name: Run Django migrations
+      command: python3 "/home/davoodi/Documents/ansible1/{{ project_name }}/manage.py" runserver
+#      args:
+ #      chdir: /home/davoodi/Documents/ansible1/{{ project_name }}
+
+
